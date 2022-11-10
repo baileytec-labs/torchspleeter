@@ -6,7 +6,8 @@ from torch import nn
 # from torchaudio.functional import istft
 
 from .unet import UNet
-from .util import tf2pytorch
+#I pre-converted the models so that there's no tensorflow required.
+#from .util import tf2pytorch
 
 
 def load_ckpt(model, ckpt):
@@ -40,7 +41,8 @@ def pad_and_partition(tensor, T):
     split = new_size // T
     return torch.cat(torch.split(tensor, T, dim=3), dim=0)
 
-
+#The answer isn't to have tensorflow somewhere on the side to convert the models, it's to pre-convert
+#the models and have the models fully loaded into torch
 class Estimator(nn.Module):
     def __init__(self, num_instrumments, checkpoint_path):
         super(Estimator, self).__init__()
@@ -55,7 +57,7 @@ class Estimator(nn.Module):
             requires_grad=False
         )
 
-        ckpts = tf2pytorch(checkpoint_path, num_instrumments)
+        ckpts = torch.load(checkpoint_path)#, num_instrumments)
 
         # filter
         self.instruments = nn.ModuleList()

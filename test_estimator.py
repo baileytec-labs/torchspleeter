@@ -7,8 +7,9 @@ from spleeter.estimator import Estimator
 
 if __name__ == '__main__':
     sr = 44100
+    #we'll need to unzip the model due to 100 MB file limitations in Github
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    es = Estimator(2, './checkpoints/2stems/model').to(device)
+    es = Estimator(2, './checkpoints/2stems/converted_model_2stems.ckpt').to(device)
     es.eval()
 
     # load wav audio

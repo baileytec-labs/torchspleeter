@@ -1,4 +1,4 @@
-import numpy as np
+"""import numpy as np
 import tensorflow as tf
 
 from .unet import UNet
@@ -89,3 +89,6 @@ def tf2pytorch(checkpoint_path, num_instrumments):
         conv_idx += 1
 
     return outputs
+"""
+
+#so basically we're going to have this file completely blank for testing
