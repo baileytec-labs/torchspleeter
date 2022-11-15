@@ -52,7 +52,7 @@ def pad_and_partition(tensor, T):
 class Estimator(nn.Module):
     def __init__(self, num_instrumments, checkpoint_path):
         super(Estimator, self).__init__()
-
+        self.num_instruments=num_instrumments
         # stft config
         self.F = 1024
         self.T = 512
@@ -63,17 +63,19 @@ class Estimator(nn.Module):
             requires_grad=False
         )
 
-        ckpts = torch.load(checkpoint_path)#, num_instrumments)
+        self.ckpts = torch.load(checkpoint_path)#, num_instrumments)
 
         # filter
-        self.instruments = nn.ModuleList()
-        for i in range(num_instrumments):
-            print('Loading model for instrumment {}'.format(i))
-            net = UNet(2)
-            ckpt = ckpts[i]
-            net = load_ckpt(net, ckpt)
-            net.eval()  # change mode to eval
-            self.instruments.append(net)
+        #this loads both net models into memory... I wonder if we can do this one at a time?
+        #cpu expensive, but possible 
+        #self.instruments = nn.ModuleList()
+        #for i in range(num_instrumments):
+        #    print('Loading model for instrumment {}'.format(i))
+        #    net = UNet(2)
+        #    ckpt = ckpts[i]
+        #    net = load_ckpt(net, ckpt)
+        #    net.eval()  # change mode to eval
+        #    self.instruments.append(net)
 
     def compute_stft(self, wav):
         """
@@ -139,10 +141,29 @@ class Estimator(nn.Module):
 
         # compute instruments' mask
         masks = []
-        for net in self.instruments:
-            print("netting a mask...")
-            mask = net(stft_mag)
+        #so it fails here from massive memory consumption on a docker container, but not on bare metal.
+        #interesting.
+        #self.instruments = nn.ModuleList()
+        #for i in range(num_instrumments):
+        #    print('Loading model for instrumment {}'.format(i))
+        #    net = UNet(2)
+        #    ckpt = ckpts[i]
+        #    net = load_ckpt(net, ckpt)
+        #    net.eval()  # change mode to eval
+        #    self.instruments.append(net)
+        for i in range(self.num_instruments):
+            print("loading model for instrument "+str(i))
+            net=UNet(2)
+            ckpt=self.ckpts[i]
+            net=load_ckpt(net,ckpt)
+            print("netting the mask...")
+            mask=net(stft_mag)
+            print("appending the mask")
             masks.append(mask)
+        #for net in self.instruments:
+        #    print("netting a mask...")
+        #    mask = net(stft_mag)
+        #    masks.append(mask)
 
         # compute denominator
         print("summing masks")
