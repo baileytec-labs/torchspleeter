@@ -1,0 +1,160 @@
+import math
+
+import torch
+import torch.nn.functional as F
+from torch import nn
+import tqdm
+# from torchaudio.functional import istft
+
+from torchspleeter.unet import UNet
+#from .util import tf2pytorch
+
+import os
+dirname = os.path.dirname(__file__)
+defaultmodel0 = os.path.join(dirname, 'checkpoints/2stems/testcheckpoint0.ckpt')
+defaultmodel1 = os.path.join(dirname, 'checkpoints/2stems/testcheckpoint1.ckpt')
+
+def load_ckpt(model, ckpt):
+    state_dict = model.state_dict()
+    for k, v in ckpt.items():
+        if k in state_dict:
+            target_shape = state_dict[k].shape
+            assert target_shape == v.shape
+            state_dict.update({k: torch.from_numpy(v)})
+        else:
+            print('Ignore ', k)
+
+    model.load_state_dict(state_dict)
+    return model
+
+
+def pad_and_partition(tensor, T):
+    """
+    pads zero and partition tensor into segments of length T
+
+    Args:
+        tensor(Tensor): BxCxFxL
+
+    Returns:
+        tensor of size (B*[L/T] x C x F x T)
+    """
+    old_size = tensor.size(3)
+    new_size = math.ceil(old_size/T) * T
+    tensor = F.pad(tensor, [0, new_size - old_size])
+    [b, c, t, f] = tensor.shape
+    split = new_size // T
+    return torch.cat(torch.split(tensor, T, dim=3), dim=0)
+
+
+class Estimator(nn.Module):
+    def __init__(self, num_instrumments=2, checkpoint_path=None):
+        super(Estimator, self).__init__()
+        if checkpoint_path is None:
+            checkpoint_path=[defaultmodel0,defaultmodel1]
+        else:
+            if len(checkpoint_path)<1:
+                checkpoint_path=[defaultmodel0,defaultmodel1]
+        # stft config
+        self.F = 1024
+        self.T = 512
+        self.win_length = 4096
+        self.hop_length = 1024
+        self.win = nn.Parameter(
+            torch.hann_window(self.win_length),
+            requires_grad=False
+        )
+
+        ckpts=[]
+        if len(checkpoint_path) != num_instrumments:
+            raise ValueError("You must submit as many models as there are instruments!")
+        for ckpt_path in checkpoint_path:
+            ckpts.append(torch.load(ckpt_path))
+
+        #self.ckpts = ckpt #torch.load(checkpoint_path)#, num_instrumments)
+
+        #ckpts = #tf2pytorch(checkpoint_path, num_instrumments)
+
+        # filter
+        self.instruments = nn.ModuleList()
+        for i in range(num_instrumments):
+            print('Loading model for instrumment {}'.format(i))
+            net = UNet(2)
+            ckpt = ckpts[i]
+            net = load_ckpt(net, ckpt)
+            net.eval()  # change mode to eval
+            self.instruments.append(net)
+
+    def compute_stft(self, wav):
+        """
+        Computes stft feature from wav
+
+        Args:
+            wav (Tensor): B x L
+        """
+
+        stft = torch.stft(wav, n_fft=self.win_length, hop_length=self.hop_length, window=self.win,
+                          center=True, return_complex=False, pad_mode='constant')
+
+        # only keep freqs smaller than self.F
+        stft = stft[:, :self.F, :, :]
+        real = stft[:, :, :, 0]
+        im = stft[:, :, :, 1]
+        mag = torch.sqrt(real ** 2 + im ** 2)
+
+        return stft, mag
+
+    def inverse_stft(self, stft):
+        """Inverses stft to wave form"""
+
+        pad = self.win_length // 2 + 1 - stft.size(1)
+        stft = F.pad(stft, (0, 0, 0, 0, 0, pad))
+        wav = torch.istft(stft, self.win_length, hop_length=self.hop_length, center=True,
+                    window=self.win)
+        return wav.detach()
+
+    def separate(self, wav):
+        """
+        Separates stereo wav into different tracks corresponding to different instruments
+
+        Args:
+            wav (tensor): 2 x L
+        """
+
+        # stft - 2 X F x L x 2
+        # stft_mag - 2 X F x L
+        stft, stft_mag = self.compute_stft(wav)
+
+        L = stft.size(2)
+
+        # 1 x 2 x F x T
+        stft_mag = stft_mag.unsqueeze(-1).permute([3, 0, 1, 2])
+        stft_mag = pad_and_partition(stft_mag, self.T)  # B x 2 x F x T
+        stft_mag = stft_mag.transpose(2, 3)  # B x 2 x T x F
+
+        B = stft_mag.shape[0]
+
+        # compute instruments' mask
+        masks = []
+        for net in self.instruments:
+            mask = net(stft_mag)
+            masks.append(mask)
+
+        # compute denominator
+        mask_sum = sum([m ** 2 for m in masks])
+        mask_sum += 1e-10
+
+        wavs = []
+        for mask in tqdm.tqdm(masks):
+            mask = (mask ** 2 + 1e-10/2)/(mask_sum)
+            mask = mask.transpose(2, 3)  # B x 2 X F x T
+
+            mask = torch.cat(
+                torch.split(mask, 1, dim=0), dim=3)
+
+            mask = mask.squeeze(0)[:,:,:L].unsqueeze(-1) # 2 x F x L x 1
+            stft_masked = stft *  mask
+            wav_masked = self.inverse_stft(stft_masked)
+
+            wavs.append(wav_masked)
+
+        return wavs
