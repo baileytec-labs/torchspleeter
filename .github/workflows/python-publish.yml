@@ -9,9 +9,8 @@
 name: pypi package deployment
 
 on:
-  push:
-    #paths:
-    #  - thingdl/**
+  release:
+    types: [published]
     branches: [master]
 
 jobs:

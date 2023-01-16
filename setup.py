@@ -23,7 +23,7 @@ print(find_packages())
 
 setup(
     name='torchspleeter',
-    version='0.0.9',
+    version='0.1.0',
     packages=find_packages(),
     entry_points={
         "console_scripts": ["torchspleeter=torchspleeter.command_interface:main"]
