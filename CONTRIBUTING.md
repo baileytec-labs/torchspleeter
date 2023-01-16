@@ -2,7 +2,7 @@ Contributing to this repo is done in a few easy steps:
 
 1) Check the existing issues in the [issues](https://github.com/sean-bailey/torchspleeter/issues).
 
-2) Raise your issue there, and see if it fits under any existing [Milestones] (https://github.com/sean-bailey/torchspleeter/milestones)
+2) Raise your issue there, and see if it fits under any existing [Milestones](https://github.com/sean-bailey/torchspleeter/milestones)
 
 3) If it is not under an existing milestone, Discuss inside the issue of what milestone to add it under, or suggest a new milstone.
 
