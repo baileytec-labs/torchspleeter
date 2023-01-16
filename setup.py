@@ -4,9 +4,10 @@ from setuptools import setup, find_packages
 import distutils.text_file
 from pathlib import Path
 from typing import List
-import os
-dirname = os.path.dirname(__file__)
-requirementsfile = os.path.join(dirname, 'REQUIREMENTS.txt')
+#import os
+#dirname = os.path.dirname(__file__)
+#requirementsfile = os.path.join(dirname, 'REQUIREMENTS.txt')
+requirementsfile="./REQUIREMENTS.txt"
 # Always prefer setuptools over distutils
 import setuptools
 
