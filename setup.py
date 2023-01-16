@@ -4,7 +4,9 @@ from setuptools import setup, find_packages
 import distutils.text_file
 from pathlib import Path
 from typing import List
-
+import os
+dirname = os.path.dirname(__file__)
+requirementsfile = os.path.join(dirname, 'REQUIREMENTS.txt')
 # Always prefer setuptools over distutils
 import setuptools
 
@@ -20,7 +22,7 @@ print(find_packages())
 
 setup(
     name='torchspleeter',
-    version='0.1.0',
+    version='0.0.9',
     packages=find_packages(),
     entry_points={
         "console_scripts": ["torchspleeter=torchspleeter.command_interface:main"]
@@ -37,6 +39,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-install_requires=_parse_requirements('REQUIREMENTS.txt'),
+install_requires=_parse_requirements(requirementsfile),
 
 )
