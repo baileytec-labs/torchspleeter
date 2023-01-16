@@ -7,7 +7,7 @@ from typing import List
 #import os
 #dirname = os.path.dirname(__file__)
 #requirementsfile = os.path.join(dirname, 'REQUIREMENTS.txt')
-requirementsfile="requirements.txt"
+#requirementsfile="requirements.txt"
 # Always prefer setuptools over distutils
 import setuptools
 
@@ -40,6 +40,12 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-install_requires=_parse_requirements(requirementsfile),
+install_requires=[
+    "torch",
+    "numpy",
+    "librosa",
+    "pydub"
+]
 
 )
+#install_requires=_parse_requirements(requirementsfile),
