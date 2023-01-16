@@ -37,6 +37,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-install_requires=_parse_requirements('REQUIREMENTS.txt'),
+install_requires=_parse_requirements('requirements.txt'),
 
 )
