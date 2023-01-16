@@ -7,7 +7,7 @@ from typing import List
 #import os
 #dirname = os.path.dirname(__file__)
 #requirementsfile = os.path.join(dirname, 'REQUIREMENTS.txt')
-requirementsfile="./REQUIREMENTS.txt"
+requirementsfile="requirements.txt"
 # Always prefer setuptools over distutils
 import setuptools
 
@@ -23,7 +23,7 @@ print(find_packages())
 
 setup(
     name='torchspleeter',
-    version='0.0.9',
+    version='0.1.0',
     packages=find_packages(),
     entry_points={
         "console_scripts": ["torchspleeter=torchspleeter.command_interface:main"]
