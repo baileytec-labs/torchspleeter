@@ -1,4 +1,4 @@
 from torchspleeter.command_interface import *
 
 
-version="0.1.01"
+version="0.1.5"
