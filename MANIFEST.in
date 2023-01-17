@@ -2,3 +2,10 @@ include README.md
 graft packagename
 global-exclude *.py[cod]
 recursive-include torchspleeter/*
+include *.md
+include *.mp3
+include *.txt
+recursive-include torchspleeter *.ckpt
+recursive-include torchspleeter *.mp3
+recursive-include torchspleeter *.py
+recursive-include torchspleeter *.txt
