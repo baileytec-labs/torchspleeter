@@ -30,9 +30,12 @@ def split_to_parts(inputaudiofile,outputdir,instruments=2,models=[]):
     testaudiofile=inputaudiofile
     channels=filedata.channels
     mono_selection=False
+    if not os.path.exists(outputdir):
+        os.makedirs(outputdir,exist_ok=True)
     if channels==1:
         mono_selection=True
         multichannel=pydub.AudioSegment.from_mono_audiosegments(filedata,filedata)
+        os.makedirs(os.path.join(outputdir,'/tmp/'),exist_ok=True)
         testaudiofile=os.path.join(outputdir,"/tmp/"+str(uuid.uuid4())+"."+testaudiofile.split('.')[-1])
         #testaudiofile=testaudiofile.split('.')[0]+"-stereo."+testaudiofile.split('.')[-1]
         multichannel.export(out_f=testaudiofile,format=testaudiofile.split('.')[-1])
