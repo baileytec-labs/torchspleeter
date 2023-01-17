@@ -35,8 +35,8 @@ def split_to_parts(inputaudiofile,outputdir,instruments=2,models=[]):
     if channels==1:
         mono_selection=True
         multichannel=pydub.AudioSegment.from_mono_audiosegments(filedata,filedata)
-        os.makedirs(os.path.join(outputdir,'/tmp/'),exist_ok=True)
-        testaudiofile=os.path.join(outputdir,"/tmp/"+str(uuid.uuid4())+"."+testaudiofile.split('.')[-1])
+        os.makedirs(os.path.join(outputdir,'tmp'),exist_ok=True)
+        testaudiofile=os.path.join(outputdir,"tmp"+str(uuid.uuid4())+"."+testaudiofile.split('.')[-1])
         #testaudiofile=testaudiofile.split('.')[0]+"-stereo."+testaudiofile.split('.')[-1]
         multichannel.export(out_f=testaudiofile,format=testaudiofile.split('.')[-1])
     print(mono_selection)
@@ -44,7 +44,7 @@ def split_to_parts(inputaudiofile,outputdir,instruments=2,models=[]):
     wav, _ = librosa.load(testaudiofile, mono=False, res_type='kaiser_fast',sr=sr)
     wav = torch.Tensor(wav).to(device)
     if mono_selection:
-        shutil.rmtree(os.path.join(outputdir,"/tmp"))
+        shutil.rmtree(os.path.join(outputdir,"tmp"))
         #os.remove(testaudiofile)
     wavs = es.separate(wav)
     outputname=str(uuid.uuid4())
