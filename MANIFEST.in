@@ -1,2 +1,4 @@
 include README.md
-include torchspleeter/checkpoints/*
+graft packagename
+global-exclude *.py[cod]
+recursive-include torchspleeter/*

@@ -23,8 +23,9 @@ print(find_packages())
 
 setup(
     name='torchspleeter',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(),
+    include_package_data=True,
     entry_points={
         "console_scripts": ["torchspleeter=torchspleeter.command_interface:main"]
     },
@@ -48,4 +49,3 @@ install_requires=[
 ]
 
 )
-#install_requires=_parse_requirements(requirementsfile),
