@@ -27,7 +27,11 @@ outputfiles=split_to_parts(input_audio_file,output_directory)
 
 ```
 
-This will return two files, one the vocals and the second everything but the vocals, using the default 2stems model included with torchspleeter. The number of files scales to the number of models specified.
+This will return two files, the first one isolates the vocals and the second everything but the vocals, using the default 2stems model included with torchspleeter. The number of files scales to the number of models specified. 
+
+### This makes torchspleeter ideal for situations specifically where you need to isolate vocals, such as generating voice datasets.
+
+
 
 
 See [the testing example](./torchspleeter/tests/test_estimator.py) for in depth useage. 
