@@ -34,7 +34,7 @@ This will return two files, the first one isolates the vocals and the second eve
 
 
 
-See [the testing example](./torchspleeter/tests/test_estimator.py) for in depth useage. 
+See [the testing example](./torchspleeter/test/test_estimator.py) for in depth useage. 
 
 
 
