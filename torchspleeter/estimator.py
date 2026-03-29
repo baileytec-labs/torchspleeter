@@ -14,7 +14,7 @@ dirname = os.path.dirname(__file__)
 defaultmodel0 = os.path.join(dirname, 'checkpoints/2stems/testcheckpoint0.ckpt')
 defaultmodel1 = os.path.join(dirname, 'checkpoints/2stems/testcheckpoint1.ckpt')
 
-def load_ckpt(model, ckpt):
+def load_ckpt(model, ckpt, verbose=False):
     state_dict = model.state_dict()
     for k, v in ckpt.items():
         if k in state_dict:
@@ -22,7 +22,8 @@ def load_ckpt(model, ckpt):
             assert target_shape == v.shape
             state_dict.update({k: torch.from_numpy(v)})
         else:
-            print('Ignore ', k)
+            if verbose:
+                print('Ignore ', k)
 
     model.load_state_dict(state_dict)
     return model
@@ -47,7 +48,7 @@ def pad_and_partition(tensor, T):
 
 
 class Estimator(nn.Module):
-    def __init__(self, num_instrumments=2, checkpoint_path=None):
+    def __init__(self, num_instrumments=2, checkpoint_path=None, verbose=False):
         super(Estimator, self).__init__()
         if checkpoint_path is None:
             checkpoint_path=[defaultmodel0,defaultmodel1]
@@ -77,10 +78,11 @@ class Estimator(nn.Module):
         # filter
         self.instruments = nn.ModuleList()
         for i in range(num_instrumments):
-            print('Loading model for instrumment {}'.format(i))
+            if verbose:
+                print('Loading model for instrumment {}'.format(i))
             net = UNet(2)
             ckpt = ckpts[i]
-            net = load_ckpt(net, ckpt)
+            net = load_ckpt(net, ckpt, verbose=verbose)
             net.eval()  # change mode to eval
             self.instruments.append(net)
 
